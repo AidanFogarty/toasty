@@ -1,6 +1,9 @@
+from aws_cdk import Duration
 from aws_cdk import aws_iam as iam
 from aws_cdk import aws_lambda as _lambda
 from aws_cdk import aws_logs as logs
+import aws_cdk.aws_scheduler_alpha as scheduler
+import aws_cdk.aws_scheduler_targets_alpha as scheduler_targets
 from constructs import Construct
 
 
@@ -85,4 +88,16 @@ async def warm_lambda_functions():
                 actions=["lambda:InvokeFunction"],
                 resources=[lambda_to_warm_arn],
             )
+        )
+
+        lambda_warmer_target = scheduler_targets.LambdaInvoke(
+            lambda_warmer_function,
+        )
+
+        scheduler.Schedule(
+            self,
+            "LambdaWarmerScheduler",
+            schedule=scheduler.ScheduleExpression.rate(Duration.minutes(5)),
+            target=lambda_warmer_target,
+            description=f"Lambda warmer schedule to keep {lambda_to_warm_arn} warm",
         )
