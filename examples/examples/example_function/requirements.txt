@@ -1,1 +1,1 @@
-toastypy==0.0.8
+toastypy==0.0.10

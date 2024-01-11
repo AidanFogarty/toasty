@@ -76,6 +76,7 @@ async def warm_lambda_functions():
             log_retention=logs.RetentionDays.ONE_WEEK
             if environment != "prod"
             else logs.RetentionDays.TWO_YEARS,
+            timeout=Duration.seconds(30),
             environment={
                 "ENVIRONMENT": environment,
                 "CONCURRENCY": str(concurrency),

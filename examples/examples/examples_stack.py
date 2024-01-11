@@ -28,12 +28,13 @@ class ExamplesStack(Stack):
                     ],
                 ),
             ),
-            handler="index.lambda_handler",
+            handler="example_function_handler.lambda_handler",
             runtime=_lambda.Runtime.PYTHON_3_11,
             description="Lambda warmer function to be kept warm",
             log_retention=logs.RetentionDays.ONE_WEEK
             if environment != "prod"
             else logs.RetentionDays.TWO_YEARS,
+            memory_size=512,
         )
 
         LambdaWarmer(
