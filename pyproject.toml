@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "toastypy"
+version = "0.0.5"
+authors = [
+  { name="Aidan Fogarty", email="aidan1fog@gmail.com" },
+]
+description = "Simple python package for keeping your lambda functions warm using an eventbridge schedule"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/AidanFogarty/toasty"
+Issues = "https://github.com/AidanFogarty/toasty/issues"
