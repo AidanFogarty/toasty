@@ -31,16 +31,18 @@ class ExamplesStack(Stack):
             handler="example_function_handler.lambda_handler",
             runtime=_lambda.Runtime.PYTHON_3_11,
             description="Lambda warmer function to be kept warm",
-            log_retention=logs.RetentionDays.ONE_WEEK
-            if environment != "prod"
-            else logs.RetentionDays.TWO_YEARS,
+            log_retention=(
+                logs.RetentionDays.ONE_WEEK
+                if environment != "prod"
+                else logs.RetentionDays.TWO_YEARS
+            ),
             memory_size=512,
         )
 
         LambdaWarmer(
             self,
             "LambdaWarmerConstruct",
-            concurrency=20,
+            concurrency=10,
             lambda_to_warm_arn=lambda_warmer_function.function_arn,
             environment=environment,
         )

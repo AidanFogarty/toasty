@@ -19,7 +19,7 @@ class LambdaWarmer(Construct):
     ):
         super().__init__(scope, construct_id, **kwargs)
 
-        lambda_warmer_function = _lambda.Function(
+        self.lambda_warmer_function = _lambda.Function(
             self,
             "LambdaWarmer",
             code=_lambda.Code.from_inline(
@@ -73,9 +73,11 @@ async def warm_lambda_functions():
             handler="index.lambda_handler",
             runtime=_lambda.Runtime.PYTHON_3_11,
             description="Lambda warmer function to keep a lambda warm",
-            log_retention=logs.RetentionDays.ONE_WEEK
-            if environment != "prod"
-            else logs.RetentionDays.TWO_YEARS,
+            log_retention=(
+                logs.RetentionDays.ONE_WEEK
+                if environment != "prod"
+                else logs.RetentionDays.TWO_YEARS
+            ),
             timeout=Duration.seconds(30),
             environment={
                 "ENVIRONMENT": environment,
@@ -84,15 +86,33 @@ async def warm_lambda_functions():
             },
         )
 
-        lambda_warmer_function.add_to_role_policy(
+        self.lambda_warmer_function.add_to_role_policy(
             iam.PolicyStatement(
                 actions=["lambda:InvokeFunction"],
                 resources=[lambda_to_warm_arn],
             )
         )
 
+        lambda_warmer_schedule_role = iam.Role(
+            self,
+            "LambdaWarmerScheduleRole",
+            assumed_by=iam.ServicePrincipal("scheduler.amazonaws.com"),
+            description="Role for the lambda warmer schedule to invoke the lambda warmer function",
+            inline_policies={
+                "lambda_warmer_schedule_policy": iam.PolicyDocument(
+                    statements=[
+                        iam.PolicyStatement(
+                            actions=["lambda:InvokeFunction"],
+                            resources=[self.lambda_warmer_function.function_arn],
+                        )
+                    ]
+                ),
+            },
+        )
+
         lambda_warmer_target = scheduler_targets.LambdaInvoke(
-            lambda_warmer_function,
+            self.lambda_warmer_function,
+            role=lambda_warmer_schedule_role,
         )
 
         scheduler.Schedule(
